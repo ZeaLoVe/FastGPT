@@ -21,10 +21,11 @@ export const sendAuthCode = (data: {
 export const getTokenLogin = () =>
   GET<UserType>('/support/user/account/tokenLogin', {}, { maxQuantity: 1 });
 export const oauthLogin = (params: OauthLoginProps) =>
-  POST<ResLogin>('/proApi/support/user/account/login/oauth', params);
+  POST<ResLogin>('/support/user/account/loginByGithubSSO', params);
 export const postFastLogin = (params: FastLoginProps) =>
   POST<ResLogin>('/proApi/support/user/account/login/fastLogin', params);
-export const ssoLogin = (params: any) => GET<ResLogin>('/proApi/support/user/account/sso', params);
+export const ssoLogin = (params: any) =>
+  GET<ResLogin>('/support/user/account/loginByGithubSSO', params);
 
 export const postRegister = ({
   username,

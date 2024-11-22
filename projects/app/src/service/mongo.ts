@@ -13,6 +13,7 @@ import { startTrainingQueue } from './core/dataset/training/utils';
 import { systemStartCb } from '@fastgpt/service/common/system/tools';
 import { addLog } from '@fastgpt/service/common/system/log';
 import { getSystemPluginCb } from './core/app/plugin';
+import { useRadio } from '@chakra-ui/react';
 
 /**
  * This function is equivalent to the entry to the service
@@ -91,5 +92,47 @@ async function initRootUser(retry = 3): Promise<any> {
       console.error('init root user error', error);
       exit(1);
     }
+  }
+}
+
+export async function addUser(username: String) {
+  try {
+    if (!username) {
+      console.error('init user error: username is null');
+    }
+    const user = await MongoUser.findOne({
+      username: username
+    });
+    console.log('find user: ', user);
+    if (!user) {
+      const psw = process.env.DEFAULT_ROOT_PSW || '123456';
+
+      await mongoSessionRun(async (session) => {
+        const [{ _id }] = await MongoUser.create(
+          [
+            {
+              username: username,
+              password: hashStr(psw)
+            }
+          ],
+          { session }
+        );
+        const userId = _id;
+
+        // 使用默认的team
+        await createDefaultTeam({ userId: userId, balance: 9999 * PRICE_SCALE, session });
+
+        console.log(`user  init:`, {
+          username: username,
+          password: psw,
+          id: userId
+        });
+      });
+    } else {
+      console.warn('user already exist', username);
+      return;
+    }
+  } catch (error) {
+    console.error('init user error', error);
   }
 }
